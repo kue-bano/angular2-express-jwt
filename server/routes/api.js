@@ -46,7 +46,9 @@ router.post('/authenticate', (req, res) => {
 router.use((req,res,next) => {
 
   //check header or url parameters or post parameters for token
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+  var token = req.headers['authorization'];
+  var splitParts = token.split(" ");
+  token = splitParts[1];
 
   //decode token
   if(token) {
@@ -56,6 +58,10 @@ router.use((req,res,next) => {
       console.log('decrypt key' + config.secret)
       if(err){
         console.log(err); // Token has expired, has been tampered with, etc
+        return res.status(401).send({
+          success: true,
+          message: 'unauthorized'
+        });
       }else{
         console.log(verifiedJwt); // Will contain the header and body
         return res.status(200).send({
